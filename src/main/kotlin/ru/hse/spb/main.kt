@@ -35,14 +35,13 @@ private data class ProcedureInvocation(
                     && parametersNames.zip(declaration.parametersTypes).all { (name, type) -> name.matchesType(type) }
 }
 
+private fun String.splitByWhitespaces(): List<String> = trim().split("\\s+".toRegex())
+
 private fun String.splitToNameAndParameters(): List<String> =
-        replace("[(),]".toRegex(), " ")
-                .trim()
-                .replace("\\s+".toRegex(), " ")
-                .split(" ")
+        replace("[(),]".toRegex(), " ").splitByWhitespaces()
 
 private fun ParametersTable.addNewParameterFrom(parameterDeclarationLine: String) {
-    val (type, name) = parameterDeclarationLine.trim().replace("\\s+".toRegex(), " ").split(" ")
+    val (type, name) = parameterDeclarationLine.splitByWhitespaces()
     put(name, ParameterType.getTypeByName(type))
 }
 
