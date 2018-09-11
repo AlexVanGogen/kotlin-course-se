@@ -17,28 +17,23 @@ private enum class ParameterType(val typeName: String) {
 private typealias ParameterName = String
 private typealias ParametersTable = MutableMap<ParameterName, ParameterType>
 
-private fun ParameterName.matchesType(type: ParameterType) = parametersTable[this] == type || type == ParameterType.ANY
-
-private data class ProcedureDeclaration(
+private class ProcedureDeclaration(
         val name: String,
         val parametersTypes: List<ParameterType>
 )
 
-private data class ProcedureInvocation(
+private class ProcedureInvocation(
         val name: String,
         val parametersNames: List<ParameterName>
-) {
+)
 
-    fun matches(declaration: ProcedureDeclaration) =
-            name == declaration.name
-                    && parametersNames.size == declaration.parametersTypes.size
-                    && parametersNames.zip(declaration.parametersTypes).all { (name, type) -> name.matchesType(type) }
-}
+private val oneOrMoreWhitespacesPattern = "\\s+".toRegex()
+private val parametersSeparatingSymbolsPattern = "[(),]".toRegex()
 
-private fun String.splitByWhitespaces(): List<String> = trim().split("\\s+".toRegex())
+private fun String.splitByWhitespaces(): List<String> = trim().split(oneOrMoreWhitespacesPattern)
 
 private fun String.splitToNameAndParameters(): List<String> =
-        replace("[(),]".toRegex(), " ").splitByWhitespaces()
+        replace(parametersSeparatingSymbolsPattern, " ").splitByWhitespaces()
 
 private fun ParametersTable.addNewParameterFrom(parameterDeclarationLine: String) {
     val (type, name) = parameterDeclarationLine.splitByWhitespaces()
@@ -62,22 +57,29 @@ private fun String.toProcedureInvocation(): ProcedureInvocation {
     )
 }
 
-private val parametersTable = mutableMapOf<ParameterName, ParameterType>()
-private val declaredProcedures = mutableListOf<ProcedureDeclaration>()
-
 private fun solve(inputData: List<String>): List<Int> {
+    val declaredProcedures = mutableListOf<ProcedureDeclaration>()
+    val parametersTable = mutableMapOf<ParameterName, ParameterType>()
+
+    fun ParameterName.matchesType(type: ParameterType) = parametersTable[this] == type || type == ParameterType.ANY
+
+    fun ProcedureInvocation.matches(declaration: ProcedureDeclaration) =
+            name == declaration.name
+                    && parametersNames.size == declaration.parametersTypes.size
+                    && parametersNames.zip(declaration.parametersTypes).all { (name, type) -> name.matchesType(type) }
+
     val line = inputData.iterator()
-    val numberOfDeclaredProcedures = line.next().toIntOrNull() ?: throw NumberFormatException()
-    repeat(numberOfDeclaredProcedures) { declaredProcedures.add(line.next().toProcedureDeclaration()) }
+    val numberOfDeclaredProcedures = line.next().toInt()
+    for (i in 1..numberOfDeclaredProcedures) { declaredProcedures.add(line.next().toProcedureDeclaration()) }
 
-    val numberOfDeclaredParameters = line.next().toIntOrNull() ?: throw NumberFormatException()
-    repeat(numberOfDeclaredParameters) { parametersTable.addNewParameterFrom(line.next()) }
+    val numberOfDeclaredParameters = line.next().toInt()
+    for (i in 1..numberOfDeclaredParameters) { parametersTable.addNewParameterFrom(line.next()) }
 
-    val numberOfProcedureInvocations = line.next().toIntOrNull() ?: throw NumberFormatException()
+    val numberOfProcedureInvocations = line.next().toInt()
     val appropriateProceduresCountForEachInvocation = MutableList(numberOfProcedureInvocations) { 0 }
-    repeat(numberOfProcedureInvocations) {
+    for (i in 1..numberOfProcedureInvocations) {
         val nextInvocation = line.next().toProcedureInvocation()
-        appropriateProceduresCountForEachInvocation[it] =
+        appropriateProceduresCountForEachInvocation[i - 1] =
                 declaredProcedures.count { declaration -> nextInvocation.matches(declaration) }
     }
     return appropriateProceduresCountForEachInvocation

@@ -6,7 +6,7 @@ import org.junit.Test
 class TestSource {
 
     @Test
-    fun testSolution() {
+    fun testSolutionOnPublicExample1() {
         assertEquals(
                 listOf(2, 1, 0, 1, 0),
                 solve("""
@@ -27,6 +27,10 @@ class TestSource {
                     proc(a)
                     """.trimIndent())
         )
+    }
+
+    @Test
+    fun testSolutionOnPublicExample2() {
         assertEquals(
                 listOf(1, 3, 0, 0, 2),
                 solve("""
