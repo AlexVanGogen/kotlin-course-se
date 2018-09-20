@@ -1,9 +1,17 @@
 package ru.hse.spb.interpreter.ast
 
+import org.antlr.v4.runtime.Token
+import ru.hse.spb.interpreter.getLocation
+
 sealed class BasicElement
 
 interface ASTElement {
     fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+}
+
+interface Named {
+    val correspondingToken: Token
+    fun getLocation() = correspondingToken.getLocation()
 }
 
 class File(
@@ -105,13 +113,15 @@ class IdentifierExpression(
 ): Expression()
 
 class Identifier(
-        val name: String
-): BasicElement(), ASTElement
+        val name: String,
+        override val correspondingToken: Token
+): BasicElement(), ASTElement, Named
 
 class LiteralExpression(
         val literal: Literal
 ): Expression()
 
 class Literal(
-        val valueAsString: String
-): BasicElement(), ASTElement
+        val valueAsString: String,
+        override val correspondingToken: Token
+): BasicElement(), ASTElement, Named

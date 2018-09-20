@@ -107,8 +107,8 @@ class LalalangASTMakingVisitor: LalalangVisitor<BasicElement> {
 
     override fun visitTerminal(node: TerminalNode): BasicElement {
         when (node.symbol.type) {
-            Identifier -> return Identifier(node.toString())
-            Literal -> return Literal(node.toString())
+            Identifier -> return Identifier(node.toString(), node.symbol)
+            Literal -> return Literal(node.toString(), node.symbol)
             else -> throw InvalidTerminalException()
         }
     }
