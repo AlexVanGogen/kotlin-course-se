@@ -1,0 +1,14 @@
+if (x < 2) {
+    println(x)
+}
+
+if (y < 2) {
+    println(y)
+} else {
+    println(2)
+}
+
+while (z < 2) {
+    println(z)
+    z = z + 1
+}

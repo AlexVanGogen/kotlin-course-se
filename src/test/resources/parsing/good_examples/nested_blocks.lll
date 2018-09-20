@@ -1,0 +1,12 @@
+fun x(i, j, k) {
+    fun y(z) {
+
+        while (z < k) {
+            z = z * 2
+        }
+
+        return z + i + j
+    }
+
+    return y(k) < (k)
+}
