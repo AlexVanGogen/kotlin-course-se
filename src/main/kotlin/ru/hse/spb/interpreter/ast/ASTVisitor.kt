@@ -2,8 +2,6 @@ package ru.hse.spb.interpreter.ast
 
 abstract class ASTVisitor<out R> {
 
-    abstract fun visit(t: ASTElement): R
-
     abstract fun visit(file: File): R
 
     abstract fun visit(block: Block): R

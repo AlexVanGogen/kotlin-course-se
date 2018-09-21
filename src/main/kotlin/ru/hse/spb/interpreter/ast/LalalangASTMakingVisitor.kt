@@ -30,7 +30,7 @@ class LalalangASTMakingVisitor: LalalangVisitor<BasicElement> {
 
     override fun visitFunction(ctx: LalalangParser.FunctionContext) = FunctionDeclaration(
             visitIdentifierExpression(ctx.Identifier()).identifier,
-            visitParameterNames(ctx.parameterNames()).names,
+            if (ctx.parameterNames() != null) visitParameterNames(ctx.parameterNames()).names else listOf(),
             visitBlockWithBraces(ctx.blockWithBraces())
     )
 
@@ -65,14 +65,14 @@ class LalalangASTMakingVisitor: LalalangVisitor<BasicElement> {
 
     override fun visitExpression(ctx: LalalangParser.ExpressionContext): Expression =
             when {
-                ctx.expression().isNotEmpty() && ctx.expression()[0] != null -> visitExpression(ctx.expression()[0])
+                ctx.nested != null -> visitExpression(ctx.nested)
                 ctx.functionCall() != null -> visitFunctionCall(ctx.functionCall())
                 ctx.Identifier() != null -> visitIdentifierExpression(ctx.Identifier())
                 ctx.Literal() != null -> visitLiteralExpression(ctx.Literal())
                 else -> {
                     val left = visitExpression(ctx.left)
                     val right = visitExpression(ctx.right)
-                    val operator = OperatorType.valueOf(ctx.operator.text)
+                    val operator = OperatorType.of(ctx.operator.text) ?: throw Exception()
                     when (ctx.operator.type) {
                         MUL, DIV, MOD -> MultiplicativeExpression(left, operator, right)
                         PLUS, MINUS -> AdditiveExpression(left, operator, right)
@@ -98,7 +98,7 @@ class LalalangASTMakingVisitor: LalalangVisitor<BasicElement> {
 
     override fun visitFunctionCall(ctx: LalalangParser.FunctionCallContext) = FunctionCallExpression(
             visitIdentifierExpression(ctx.Identifier()).identifier,
-            visitArguments(ctx.arguments()).values
+            if (ctx.arguments() != null) visitArguments(ctx.arguments()).values else listOf()
     )
 
     override fun visitArguments(ctx: LalalangParser.ArgumentsContext) = Arguments(
