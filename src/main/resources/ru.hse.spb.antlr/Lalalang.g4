@@ -3,27 +3,27 @@ grammar Lalalang;
 file            : block EOF;
 block           : NEWLINE* (statement NEWLINE+)* (statement NEWLINE?)? NEWLINE*;
 blockWithBraces : LBRACK block RBRACK;
-statement       : function | variable | expression | whileStatement | ifStatement | assignment | returnStatement;
-function        : FUN Identifier LPAREN parameterNames RPAREN functionBody=blockWithBraces;
+statement       : function | returnStatement | whileStatement | ifStatement | assignment | expression | variable;
+function        : FUN Identifier LPAREN parameterNames? RPAREN functionBody=blockWithBraces;
 variable        : VAR Identifier (ASSIGN expression)?;
 parameterNames  : Identifier (COMMA Identifier)*;
 whileStatement  : WHILE LPAREN expression RPAREN loopBody=blockWithBraces;
 ifStatement     : IF LPAREN expression RPAREN ifTrueBody=blockWithBraces (ELSE ifFalseBody=blockWithBraces)?;
 assignment      : Identifier ASSIGN expression;
 returnStatement : RETURN expression;
-expression      : LPAREN expression RPAREN
-                | functionCall
-                | Identifier
-                | Literal
+expression      : LPAREN nested=expression RPAREN
                 | left=expression operator=(MUL | DIV | MOD)     right=expression
                 | left=expression operator=(PLUS | MINUS)        right=expression
                 | left=expression operator=(GT | GEQ | LT | LEQ) right=expression
                 | left=expression operator=(EQ | NEQ)            right=expression
                 | left=expression operator=(AND | OR)            right=expression
+                | functionCall
+                | Identifier
+                | Literal
                 | unaryExpression;
 unaryExpression : PLUS expression | MINUS expression;
 
-functionCall    : Identifier LPAREN arguments RPAREN ;
+functionCall    : Identifier LPAREN arguments? RPAREN ;
 arguments       : expression (COMMA expression)* ;
 
 NEWLINE             : [\r\n] ;
