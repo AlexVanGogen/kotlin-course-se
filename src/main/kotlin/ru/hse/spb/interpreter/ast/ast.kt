@@ -28,7 +28,9 @@ class FunctionDeclaration(
         val name: Identifier,
         val parameters: List<Identifier>,
         val body: Block
-): Statement(), ASTElement
+): Statement(), ASTElement {
+    val signature: String = "$name(${List(parameters.size) { "int" }.joinToString(separator = ", ")})"
+}
 
 class ParameterNames(
         val names: List<Identifier>
@@ -98,7 +100,9 @@ class LogicalExpression(
 class FunctionCallExpression(
         val name: Identifier,
         val arguments: List<Expression>
-): Expression(), ASTElement
+): Expression(), ASTElement {
+    val signature: String = "$name(${List(arguments.size) { "int" }.joinToString(separator = ", ")})"
+}
 
 class Arguments(
         val values: List<Expression>
