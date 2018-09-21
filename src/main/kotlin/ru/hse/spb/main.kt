@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.RecognitionException
 import ru.hse.spb.interpreter.ast.LalalangASTMakingVisitor
 import ru.hse.spb.interpreter.ParserFactory
 import ru.hse.spb.interpreter.errors.LexerException
+import ru.hse.spb.interpreter.represent.RepresentationVisitor
 
 fun main(args: Array<String>) {
     if (args.size != 1) {
@@ -14,7 +15,8 @@ fun main(args: Array<String>) {
     try {
         val parser = ParserFactory.fromFile(args[0])
         val visitor = LalalangASTMakingVisitor()
-        visitor.visitFile(parser.file())
+        val file = visitor.visitFile(parser.file())
+        file.accept(RepresentationVisitor())
     } catch (e: LexerException) {
         println(e.message)
         return
