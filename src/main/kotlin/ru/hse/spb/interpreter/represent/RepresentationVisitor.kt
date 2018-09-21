@@ -34,14 +34,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         indent--
     }
 
-    override fun visit(expression: ExpressionStatement) {
-//        printWithIndent("Function declaration", indent)
-//        indent++
-//        expression.
-//        expression.parameters.forEach { it.accept(this) }
-//        expression.body.accept(this)
-//        indent--
-    }
+    override fun visit(expression: ExpressionStatement) {}
 
     override fun visit(expression: WhileStatement) {
         printWithIndent("While statement", indent)
@@ -122,6 +115,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
     override fun visit(expression: UnarySignedExpression) {
         printWithIndent("Unary signed expression", indent)
         indent++
+        printWithIndent("Sign: ${expression.sign}", indent)
         expression.expression.accept(this)
         indent--
     }

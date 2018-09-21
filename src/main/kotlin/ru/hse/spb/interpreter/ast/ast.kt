@@ -154,11 +154,20 @@ class Arguments(
 ): BasicElement()
 
 class UnarySignedExpression(
-        val expression: Expression
+        val expression: Expression,
+        val sign: Sign
 ): Expression(), ASTElement {
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
+enum class Sign(val symbol: String) {
+    PLUS("+"),
+    MINUS("-");
+
+    companion object {
+        fun of(sign: String) = values().find { it.symbol == sign }
+    }
+}
 class IdentifierExpression(
         val identifier: Identifier
 ): Expression() {

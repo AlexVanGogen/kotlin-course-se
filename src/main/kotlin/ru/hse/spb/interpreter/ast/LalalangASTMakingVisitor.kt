@@ -25,7 +25,7 @@ class LalalangASTMakingVisitor: LalalangVisitor<BasicElement> {
                 ctx.ifStatement() != null -> visitIfStatement(ctx.ifStatement())
                 ctx.assignment() != null -> visitAssignment(ctx.assignment())
                 ctx.returnStatement() != null -> visitReturnStatement(ctx.returnStatement())
-                else -> throw InvalidStatementException()
+                else -> throw InvalidStatementException(ctx.start)
             }
 
     override fun visitFunction(ctx: LalalangParser.FunctionContext) = FunctionDeclaration(
@@ -69,6 +69,7 @@ class LalalangASTMakingVisitor: LalalangVisitor<BasicElement> {
                 ctx.functionCall() != null -> visitFunctionCall(ctx.functionCall())
                 ctx.Identifier() != null -> visitIdentifierExpression(ctx.Identifier())
                 ctx.Literal() != null -> visitLiteralExpression(ctx.Literal())
+                ctx.unaryExpression() != null -> visitUnaryExpression(ctx.unaryExpression())
                 else -> {
                     val left = visitExpression(ctx.left)
                     val right = visitExpression(ctx.right)
@@ -78,7 +79,7 @@ class LalalangASTMakingVisitor: LalalangVisitor<BasicElement> {
                         PLUS, MINUS -> AdditiveExpression(left, operator, right)
                         LT, LEQ, GT, GEQ, EQ, NEQ -> ComparisonExpression(left, operator, right)
                         AND, OR -> LogicalExpression(left, operator, right)
-                        else -> throw InvalidExpressionException()
+                        else -> throw OperatorNotFoundException(ctx.operator)
                     }
                 }
             }
@@ -89,7 +90,8 @@ class LalalangASTMakingVisitor: LalalangVisitor<BasicElement> {
     override fun visit(tree: ParseTree?) = null
 
     override fun visitUnaryExpression(ctx: LalalangParser.UnaryExpressionContext) = UnarySignedExpression(
-            visitExpression(ctx.expression())
+            visitExpression(ctx.expression()),
+            if (ctx.MINUS() != null) Sign.MINUS else Sign.PLUS
     )
 
     override fun visitChildren(node: RuleNode?) = null
@@ -109,7 +111,7 @@ class LalalangASTMakingVisitor: LalalangVisitor<BasicElement> {
         when (node.symbol.type) {
             Identifier -> return Identifier(node.toString(), node.symbol)
             Literal -> return Literal(node.toString(), node.symbol)
-            else -> throw InvalidTerminalException()
+            else -> throw InvalidTerminalException(node)
         }
     }
 }
