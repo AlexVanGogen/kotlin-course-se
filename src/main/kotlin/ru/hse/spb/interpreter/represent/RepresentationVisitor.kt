@@ -17,54 +17,54 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         indent--
     }
 
-    override fun visit(expression: FunctionDeclaration) {
+    override fun visit(declaration: FunctionDeclaration) {
         printWithIndent("Function declaration", indent)
         indent++
-        expression.name.accept(this)
-        expression.parameters.forEach { it.accept(this) }
-        expression.body.accept(this)
+        declaration.name.accept(this)
+        declaration.parameters.forEach { it.accept(this) }
+        declaration.body.accept(this)
         indent--
     }
 
-    override fun visit(expression: VariableDeclaration) {
+    override fun visit(declaration: VariableDeclaration) {
         printWithIndent("Variable declaration", indent)
         indent++
-        expression.name.accept(this)
-        expression.assignedExpression?.accept(this)
+        declaration.name.accept(this)
+        declaration.assignedExpression?.accept(this)
         indent--
     }
 
-    override fun visit(expression: ExpressionStatement) {}
+    override fun visit(statement: ExpressionStatement) {}
 
-    override fun visit(expression: WhileStatement) {
+    override fun visit(statement: WhileStatement) {
         printWithIndent("While statement", indent)
         indent++
-        expression.condition.accept(this)
-        expression.body.accept(this)
+        statement.condition.accept(this)
+        statement.body.accept(this)
         indent--
     }
 
-    override fun visit(expression: IfStatement) {
+    override fun visit(statement: IfStatement) {
         printWithIndent("If statement", indent)
         indent++
-        expression.condition.accept(this)
-        expression.trueBlock.accept(this)
-        expression.falseBlock?.accept(this)
+        statement.condition.accept(this)
+        statement.trueBlock.accept(this)
+        statement.falseBlock?.accept(this)
         indent--
     }
 
-    override fun visit(expression: AssignmentStatement) {
+    override fun visit(statement: AssignmentStatement) {
         printWithIndent("Assignment statement", indent)
         indent++
-        expression.variableName.accept(this)
-        expression.assignedExpression.accept(this)
+        statement.variableName.accept(this)
+        statement.assignedExpression.accept(this)
         indent--
     }
 
-    override fun visit(expression: ReturnStatement) {
+    override fun visit(statement: ReturnStatement) {
         printWithIndent("Return statement", indent)
         indent++
-        expression.expression.accept(this)
+        statement.expression.accept(this)
         indent--
     }
 

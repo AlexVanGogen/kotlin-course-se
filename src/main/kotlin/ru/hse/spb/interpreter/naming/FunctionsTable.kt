@@ -4,7 +4,7 @@ import ru.hse.spb.interpreter.ast.FunctionCallExpression
 import ru.hse.spb.interpreter.ast.FunctionDeclaration
 
 class FunctionsTable {
-    val functions: MutableSet<FunctionDeclaration> = mutableSetOf()
+    private val functions: MutableSet<FunctionDeclaration> = mutableSetOf()
 
     fun add(declaration: FunctionDeclaration) {
         functions.add(declaration)
@@ -13,5 +13,5 @@ class FunctionsTable {
     operator fun contains(declaration: FunctionDeclaration) = functions.any { it.name == declaration.name }
     operator fun contains(call: FunctionCallExpression) = functions.any { it.name == call.name }
 
-    fun getFunctionDeclarationOrNullFor(call: FunctionCallExpression) = functions.find { it.name == call.name }
+    fun getFunctionDeclarationOrNullFor(call: FunctionCallExpression) = functions.find { it.signature == call.signature }
 }

@@ -6,19 +6,19 @@ abstract class ASTVisitor<out R> {
 
     abstract fun visit(block: Block): R
 
-    abstract fun visit(expression: FunctionDeclaration): R
+    abstract fun visit(declaration: FunctionDeclaration): R
 
-    abstract fun visit(expression: VariableDeclaration): R
+    abstract fun visit(declaration: VariableDeclaration): R
 
-    abstract fun visit(expression: ExpressionStatement): R
+    abstract fun visit(statement: ExpressionStatement): R
 
-    abstract fun visit(expression: WhileStatement): R
+    abstract fun visit(statement: WhileStatement): R
 
-    abstract fun visit(expression: IfStatement): R
+    abstract fun visit(statement: IfStatement): R
 
-    abstract fun visit(expression: AssignmentStatement): R
+    abstract fun visit(statement: AssignmentStatement): R
 
-    abstract fun visit(expression: ReturnStatement): R
+    abstract fun visit(statement: ReturnStatement): R
 
     abstract fun visit(expression: MultiplicativeExpression): R
 

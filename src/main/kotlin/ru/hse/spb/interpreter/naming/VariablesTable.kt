@@ -1,10 +1,9 @@
 package ru.hse.spb.interpreter.naming
 
 import ru.hse.spb.interpreter.ast.Identifier
-import ru.hse.spb.interpreter.ast.VariableDeclaration
 
 class VariablesTable {
-    val variables: MutableMap<String, Int> = mutableMapOf()
+    private val variables: MutableMap<String, Int> = mutableMapOf()
 
     fun add(variable: Identifier, value: Int) {
         variables[variable.name] = value

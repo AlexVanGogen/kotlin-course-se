@@ -23,6 +23,7 @@ class File(
 class Block(
         val statementList: List<Statement>
 ): BasicElement(), ASTElement {
+
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
@@ -33,7 +34,7 @@ class FunctionDeclaration(
         val parameters: List<Identifier>,
         val body: Block
 ): Statement(), ASTElement {
-    val signature: String = "$name(${List(parameters.size) { "int" }.joinToString(separator = ", ")})"
+    val signature: String = "${name.name}(${List(parameters.size) { "int" }.joinToString(separator = ", ")})"
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
@@ -144,7 +145,7 @@ class FunctionCallExpression(
         val name: Identifier,
         val arguments: List<Expression>
 ): Expression(), ASTElement {
-    val signature: String = "$name(${List(arguments.size) { "int" }.joinToString(separator = ", ")})"
+    val signature: String = "${name.name}(${List(arguments.size) { "int" }.joinToString(separator = ", ")})"
     
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
@@ -168,6 +169,7 @@ enum class Sign(val symbol: String) {
         fun of(sign: String) = values().find { it.symbol == sign }
     }
 }
+
 class IdentifierExpression(
         val identifier: Identifier
 ): Expression() {
