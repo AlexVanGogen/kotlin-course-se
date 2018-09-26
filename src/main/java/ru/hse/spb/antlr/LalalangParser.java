@@ -3,11 +3,8 @@ package ru.hse.spb.antlr;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class LalalangParser extends Parser {
@@ -31,7 +28,7 @@ public class LalalangParser extends Parser {
 	public static final String[] ruleNames = {
 		"file", "block", "blockWithBraces", "statement", "function", "variable", 
 		"parameterNames", "whileStatement", "ifStatement", "assignment", "returnStatement", 
-		"expression", "unaryExpression", "functionCall", "arguments"
+		"signedSubexpression", "unaryExpression", "functionCall", "arguments"
 	};
 
 	private static final String[] _LITERAL_NAMES = {
