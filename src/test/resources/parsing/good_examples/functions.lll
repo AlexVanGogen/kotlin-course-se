@@ -1,9 +1,0 @@
-fun x(i, j, k) {
-    return i + j + k
-}
-
-fun y(i) {
-    println(i)
-}
-
-y(x(1, 2, 3))

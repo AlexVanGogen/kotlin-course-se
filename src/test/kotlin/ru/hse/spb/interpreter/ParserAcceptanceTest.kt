@@ -15,44 +15,130 @@ class ParserAcceptanceTest {
 
     @Test
     fun `parser accepts an empty program`() {
-        `parser must accept program`("empty.lll")
+        `parser must accept program`("")
     }
 
     @Test
     fun `parser accepts simple binary operations`() {
-        `parser must accept program`("binary_operations.lll")
+        `parser must accept program`(
+                """
+                    1 + -1
+                    2-2
+                    3* 3
+                    4 / 4
+                    5 %5
+                    6 < 6
+                    7 <= 7
+                    8 > a
+                    9 >= x
+                    -10 == 11
+                    p != 12
+                    13 && 14
+                    13 || 14
+                """.trimIndent()
+        )
     }
 
     @Test
     fun `parser accepts expressions`() {
-        `parser must accept program`("expressions.lll")
+        `parser must accept program`(
+                """
+                    1 + (2-3) * 4 + 5
+                    3 < (2 && 18) < 4 < 5 > 4 > 3 > 2 > 1
+                    5 % 0 % 9420958235088041
+                """.trimIndent()
+        )
     }
 
     @Test
     fun `parser accepts functions`() {
-        `parser must accept program`("functions.lll")
+        `parser must accept program`(
+                """
+                    fun x(i, j, k) {
+                        return i + j + k
+                    }
+
+                    fun y(i) {
+                        println(i)
+                    }
+
+                    y(x(1, 2, 3))
+                """.trimIndent()
+        )
     }
 
     @Test
     fun `parser accepts nested blocks`() {
-        `parser must accept program`("nested_blocks.lll")
+        `parser must accept program`(
+                """
+                    fun x(i, j, k) {
+                        fun y(z) {
+
+                            while (z < k) {
+                                z = z * 2
+                            }
+
+                            return z + i + j
+                        }
+
+                        return y(k) < (k)
+                    }
+                """.trimIndent()
+        )
     }
 
     @Test
     fun `parser accepts statements`() {
-        `parser must accept program`("statements.lll")
+        `parser must accept program`(
+                """
+                    if (x < 2) {
+                        println(x)
+                    }
+
+                    if (y < 2) {
+                        println(y)
+                    } else {
+                        println(2)
+                    }
+
+                    while (z < 2) {
+                        println(z)
+                        z = z + 1
+                    }
+                """.trimIndent()
+        )
     }
 
+    /**
+     * Parser will accept the code below, since it's grammatically correct.
+     */
     @Test
-    fun `parser accepts variable declarations`() {
-        `parser must accept program`("variables.lll")
+    fun `parser accepts variable assignments`() {
+        `parser must accept program`(
+                """
+                    x = 5
+                    y = 1
+                    x < y
+                """.trimIndent()
+        )
     }
 
     @Test
     fun `parser does not accept uncompleted expressions`() {
-        for (i in 1..3) {
+        val incorrectCodes = listOf(
+                """
+                    1 +
+                """.trimIndent(),
+                """
+                    * 2
+                """.trimIndent(),
+                """
+                    3 + 4 - 5 %
+                """.trimIndent()
+        )
+        for (incorrectCode in incorrectCodes) {
             assertThrows(RecognitionException::class.java) {
-                `parser must not accept program`("uncompleted_expr_$i.lll")
+                `parser must not accept program`(incorrectCode)
             }
         }
     }
@@ -60,39 +146,48 @@ class ParserAcceptanceTest {
     @Test
     fun `parser does not accept programs with unsupported symbols`() {
         assertThrows(LexerException::class.java) {
-            `parser must not accept program`("invalid_symbol.lll")
+            `parser must not accept program`(
+                    """
+                        x := 2
+                    """.trimIndent()
+            )
         }
     }
 
     @Test
     fun `parser does not accept programs with extra braces`() {
         assertThrows(RecognitionException::class.java) {
-            `parser must not accept program`("extra_braces.lll")
+            `parser must not accept program`(
+                    """
+                        if (x < 1) {
+                            println(x)
+                        }
+                        {}
+                    """.trimIndent()
+            )
         }
     }
 
     @Test
     fun `parser does not accept programs with incorrect bracket sequence`() {
         assertThrows(RecognitionException::class.java) {
-            `parser must not accept program`("incorrect_bracket_sequence.lll")
+            `parser must not accept program`(
+                    """
+                        1 + (2 - (3 + 4) - 5) + 6) - 7
+                    """.trimIndent()
+            )
         }
     }
 
     /**
      * Next two functions throw [RecognitionException] or [LexerException]
      * because they encapsulate parsing stage.
-     * @see [ASTFactory.fromFile]
      */
-    private fun `parser must accept program`(filename: String) {
-        ASTFactory.fromFile("$GOOD_EXAMPLES_DIR_NAME/$filename")
+    private fun `parser must accept program`(code: String) {
+        ASTFactory.fromString(code)
     }
 
-    private fun `parser must not accept program`(filename: String) {
-        ASTFactory.fromFile("$FAILING_EXAMPLES_DIR_NAME/$filename")
-    }
-
-    companion object {
-        private const val GOOD_EXAMPLES_DIR_NAME = "src/test/resources/parsing/good_examples"
-        private const val FAILING_EXAMPLES_DIR_NAME = "src/test/resources/parsing/failing_examples"
+    private fun `parser must not accept program`(code: String) {
+        ASTFactory.fromString(code)
     }
 }
