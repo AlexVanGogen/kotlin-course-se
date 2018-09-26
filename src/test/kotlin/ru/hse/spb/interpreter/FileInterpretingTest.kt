@@ -1,12 +1,7 @@
 package ru.hse.spb.interpreter
 
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import ru.hse.spb.antlr.LalalangParser
-import ru.hse.spb.interpreter.ast.CustomASTMapper
-import ru.hse.spb.interpreter.errors.ParsingErrorStrategy
 
 /**
  * Test correctness of real programs interpreting.
@@ -212,20 +207,5 @@ class FileInterpretingTest {
             return fib(10) // returns 55
         """.trimIndent()
         assertEquals(55, eval(code))
-    }
-
-    private fun eval(code: String): Int {
-        val parser = ASTFactory.fromString(code)
-        val visitor = CustomASTMapper()
-        val file = visitor.visitFile(parser.file())
-        return file.accept(InterpretingVisitor())
-    }
-
-    private fun ASTFactory.Companion.fromString(code: String): LalalangParser {
-        val lexer = SafeLalalangLexer(CharStreams.fromString(code))
-        val tokens = CommonTokenStream(lexer)
-        val parser = LalalangParser(tokens)
-        parser.errorHandler = ParsingErrorStrategy()
-        return parser
     }
 }

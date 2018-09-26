@@ -11,7 +11,7 @@ import ru.hse.spb.interpreter.errors.LexerException
  * parser recognizes input, but only whether it recognizes that input
  * or not.
  */
-class ParsingTest {
+class ParserAcceptanceTest {
 
     @Test
     fun `parser accepts an empty program`() {
