@@ -4,8 +4,6 @@ import ru.hse.spb.interpreter.ast.*
 
 class RepresentationVisitor: ASTVisitor<Unit>() {
 
-    private var indent = 0
-
     override fun visit(file: File) {
         file.block.accept(this)
     }
@@ -129,6 +127,8 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
     private fun printWithIndent(str: String, indent: Int) {
         println("\t".repeat(indent) + str)
     }
+
+    private var indent = 0
 
     private fun withIndent(block: () -> Unit) {
         indent++

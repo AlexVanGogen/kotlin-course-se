@@ -110,12 +110,8 @@ class PrettyPrintingVisitor: ASTVisitor<Unit>() {
 
     private var indent = -1
 
-    private fun printlnWithIndent(str: String) {
-        println("\t".repeat(indent) + str)
-    }
-
     private fun printWithIndent(str: String) {
-        print("\t".repeat(indent) + str)
+        print("    ".repeat(indent) + str)
     }
 
     private fun withIndent(block: () -> Unit) {

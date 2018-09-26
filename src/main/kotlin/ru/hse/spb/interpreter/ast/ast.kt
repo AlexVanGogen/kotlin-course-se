@@ -23,7 +23,6 @@ class File(
 class Block(
         val statementList: List<Statement>
 ): BasicLanguageElement(), ASTElement {
-
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
