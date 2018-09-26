@@ -5,10 +5,13 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import ru.hse.spb.interpreter.errors.LexerException
 
+/**
+ * Tests in this class are like `is parser in solidarity with grammar
+ * and accepts the same programs`. There is no information about how
+ * parser recognizes input, but only whether it recognizes that input
+ * or not.
+ */
 class ParsingTest {
-
-    private val GOOD_EXAMPLES_DIR_NAME = "src/test/resources/parsing/good_examples"
-    private val FAILING_EXAMPLES_DIR_NAME = "src/test/resources/parsing/failing_examples"
 
     @Test
     fun `parser accepts an empty program`() {
@@ -75,11 +78,21 @@ class ParsingTest {
         }
     }
 
+    /**
+     * Next two functions throw [RecognitionException] or [LexerException]
+     * because they encapsulate parsing stage.
+     * @see [ASTFactory.fromFile]
+     */
     private fun `parser must accept program`(filename: String) {
-        ParserFactory.fromFile("$GOOD_EXAMPLES_DIR_NAME/$filename").file()
+        ASTFactory.fromFile("$GOOD_EXAMPLES_DIR_NAME/$filename")
     }
 
     private fun `parser must not accept program`(filename: String) {
-        ParserFactory.fromFile("$FAILING_EXAMPLES_DIR_NAME/$filename").file()
+        ASTFactory.fromFile("$FAILING_EXAMPLES_DIR_NAME/$filename")
+    }
+
+    companion object {
+        private const val GOOD_EXAMPLES_DIR_NAME = "src/test/resources/parsing/good_examples"
+        private const val FAILING_EXAMPLES_DIR_NAME = "src/test/resources/parsing/failing_examples"
     }
 }
