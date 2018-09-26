@@ -3,7 +3,7 @@ package ru.hse.spb.interpreter.ast
 import org.antlr.v4.runtime.Token
 import ru.hse.spb.interpreter.getLocation
 
-sealed class BasicElement
+sealed class BasicLanguageElement
 
 interface ASTElement {
     fun <R> accept(visitor: ASTVisitor<R>): R
@@ -16,40 +16,36 @@ interface Named {
 
 class File(
         val block: Block
-): BasicElement(), ASTElement {
+): BasicLanguageElement(), ASTElement {
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class Block(
         val statementList: List<Statement>
-): BasicElement(), ASTElement {
+): BasicLanguageElement(), ASTElement {
 
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
-sealed class Statement: BasicElement(), ASTElement
+sealed class Statement: BasicLanguageElement(), ASTElement
 
 class FunctionDeclaration(
-        val name: Identifier,
+        val identifier: Identifier,
         val parameters: List<Identifier>,
         val body: Block
 ): Statement(), ASTElement {
-    val signature: String = "${name.name}(${List(parameters.size) { "int" }.joinToString(separator = ", ")})"
+    val signature: String = "${identifier.name}(${List(parameters.size) { "int" }.joinToString(separator = ", ")})"
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class ParameterNames(
-        val names: List<Identifier>
-): BasicElement()
+        val identifiers: List<Identifier>
+): BasicLanguageElement()
 
 class VariableDeclaration(
-        val name: Identifier,
+        val identifier: Identifier,
         val assignedExpression: Expression?
 ): Statement(), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
-}
-
-class ExpressionStatement: Statement() {
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
@@ -105,7 +101,12 @@ enum class OperatorType(val symbol: String) {
     OR("||");
 
     companion object {
-        fun of(operator: String) = values().find { it.symbol == operator }
+        /**
+         * The !! operator is null-safe here, because any unsupported operators
+         * are detected while that AST is just building.
+         * (@see [CustomASTMapper.visitExpression] for the details)
+         */
+        fun of(operator: String) = values().find { it.symbol == operator }!!
     }
 }
 
@@ -142,20 +143,20 @@ class LogicalExpression(
 }
 
 class FunctionCallExpression(
-        val name: Identifier,
+        val identifier: Identifier,
         val arguments: List<Expression>
 ): Expression(), ASTElement {
-    val signature: String = "${name.name}(${List(arguments.size) { "int" }.joinToString(separator = ", ")})"
+    val signature: String = "${identifier.name}(${List(arguments.size) { "int" }.joinToString(separator = ", ")})"
     
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class Arguments(
         val values: List<Expression>
-): BasicElement()
+): BasicLanguageElement()
 
 class UnarySignedExpression(
-        val expression: Expression,
+        val signedSubexpression: Expression,
         val sign: Sign
 ): Expression(), ASTElement {
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
@@ -174,12 +175,14 @@ class IdentifierExpression(
         val identifier: Identifier
 ): Expression() {
     override fun <R> accept(visitor: ASTVisitor<R>) = identifier.accept(visitor)
+
+    companion object
 }
 
 class Identifier(
         val name: String,
         override val correspondingToken: Token
-): BasicElement(), ASTElement, Named {
+): BasicLanguageElement(), ASTElement, Named {
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
@@ -187,11 +190,13 @@ class LiteralExpression(
         val literal: Literal
 ): Expression() {
     override fun <R> accept(visitor: ASTVisitor<R>) = literal.accept(visitor)
+
+    companion object
 }
 
 class Literal(
         val valueAsString: String,
         override val correspondingToken: Token
-): BasicElement(), ASTElement, Named {
+): BasicLanguageElement(), ASTElement, Named {
     override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }

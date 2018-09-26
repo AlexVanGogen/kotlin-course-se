@@ -3,17 +3,16 @@ package ru.hse.spb.interpreter.naming
 import ru.hse.spb.interpreter.ast.FunctionCallExpression
 import ru.hse.spb.interpreter.ast.FunctionDeclaration
 import ru.hse.spb.interpreter.ast.Identifier
-import ru.hse.spb.interpreter.ast.VariableDeclaration
 
 class Namespace(
         val enclosingNamespace: Namespace? = null
 ) {
-    val functionsTable = FunctionsTable()
-    val variablesTable = VariablesTable()
+    private val functionsTable = FunctionsTable()
+    private val variablesTable = VariablesTable()
 
     fun addFunction(declaration: FunctionDeclaration) {
         if (functionContainsInCurrentNamespace(declaration))
-            throw DuplicatedFunctionException(declaration.name)
+            throw DuplicatedFunctionException(declaration.identifier)
         functionsTable.add(declaration)
     }
 

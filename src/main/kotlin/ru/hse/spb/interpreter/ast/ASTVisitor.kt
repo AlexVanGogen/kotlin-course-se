@@ -10,8 +10,6 @@ abstract class ASTVisitor<out R> {
 
     abstract fun visit(declaration: VariableDeclaration): R
 
-    abstract fun visit(statement: ExpressionStatement): R
-
     abstract fun visit(statement: WhileStatement): R
 
     abstract fun visit(statement: IfStatement): R

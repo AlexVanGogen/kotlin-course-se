@@ -51,14 +51,11 @@ class ParsingErrorStrategy: DefaultErrorStrategy() {
 
     override fun reportError(recognizer: Parser, recognitionException: RecognitionException) {
         beginErrorCondition(recognizer)
-        if (recognitionException is NoViableAltException) {
-            reportNoViableAlternative(recognizer, recognitionException)
-        } else if (recognitionException is InputMismatchException) {
-            reportInputMismatch(recognizer, recognitionException)
-        } else if (recognitionException is FailedPredicateException) {
-            reportFailedPredicate(recognizer, recognitionException)
-        } else {
-            reportUnwantedToken(recognizer)
+        when (recognitionException) {
+            is NoViableAltException -> reportNoViableAlternative(recognizer, recognitionException)
+            is InputMismatchException -> reportInputMismatch(recognizer, recognitionException)
+            is FailedPredicateException -> reportFailedPredicate(recognizer, recognitionException)
+            else -> reportUnwantedToken(recognizer)
         }
     }
 

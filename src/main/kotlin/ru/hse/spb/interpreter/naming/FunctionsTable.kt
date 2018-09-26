@@ -10,8 +10,8 @@ class FunctionsTable {
         functions.add(declaration)
     }
 
-    operator fun contains(declaration: FunctionDeclaration) = functions.any { it.name == declaration.name }
-    operator fun contains(call: FunctionCallExpression) = functions.any { it.name == call.name }
+    operator fun contains(declaration: FunctionDeclaration) = functions.any { it.identifier.name == declaration.identifier.name }
+    operator fun contains(call: FunctionCallExpression) = functions.any { it.identifier.name == call.identifier.name }
 
     fun getFunctionDeclarationOrNullFor(call: FunctionCallExpression) = functions.find { it.signature == call.signature }
 }

@@ -8,8 +8,8 @@ import ru.hse.spb.interpreter.naming.Namespace
  *
  * Semantics of interpretation is following:
  * 1) Every language construction (i.e. node of AST) has an integer value.
- *    For example, for expression it's just its calculated value;
- *    for variable declaration it's calculated value of assigned expression,
+ *    For example, for signedSubexpression it's just its calculated value;
+ *    for variable declaration it's calculated value of assigned signedSubexpression,
  *    or 0 if nothing is assigned;
  *    for `if` statement it's a result of corresponding block (of true or false branch).
  * 2) Result of block interpreting is a calculated value of the first `return` statement
@@ -20,11 +20,11 @@ import ru.hse.spb.interpreter.naming.Namespace
  *    Corresponding declarations must be declared earlier in code.
  * 4) Functions overloading is not allowed.
  * 5) Duplicated variable declarations inside the same namespace are not allowed.
- * 6) One variable declaration shadows another declaration for variable with the same name
+ * 6) One variable declaration shadows another declaration for variable with the same identifier
  *    if the latter declared in enclosing namespace or as function parameter.
  *    Function parameter shadows declarations inside enclosing namespaces.
- * 7) When interpreter sees an assignment, it first calculates an assigned expression,
- *    and just after that checks if variable an expression is assigned to, causes no errors.
+ * 7) When interpreter sees an assignment, it first calculates an assigned signedSubexpression,
+ *    and just after that checks if variable an signedSubexpression is assigned to, causes no errors.
  */
 class InterpretingVisitor: ASTVisitor<Int>() {
 
@@ -56,21 +56,16 @@ class InterpretingVisitor: ASTVisitor<Int>() {
 
     override fun visit(declaration: VariableDeclaration): Int {
         val assignedExpressionValue = declaration.assignedExpression?.accept(this) ?: 0
-        currentNamespace.addVariable(declaration.name, assignedExpressionValue)
+        currentNamespace.addVariable(declaration.identifier, assignedExpressionValue)
         return assignedExpressionValue
     }
-
-    override fun visit(statement: ExpressionStatement): Int = 0
 
     override fun visit(statement: WhileStatement): Int {
         var loopResult = 0
 
         while (statement.condition.accept(this) != 0) {
-            currentNamespace = Namespace(currentNamespace)
-            try {
-                loopResult = statement.body.accept(this)
-            } finally {
-                currentNamespace = currentNamespace.enclosingNamespace!!
+            loopResult = inNewNamespace {
+                statement.body.accept(this)
             }
         }
 
@@ -80,20 +75,9 @@ class InterpretingVisitor: ASTVisitor<Int>() {
     override fun visit(statement: IfStatement): Int {
         val conditionResult = statement.condition.accept(this)
         return if (conditionResult != 0) {
-            currentNamespace = Namespace(currentNamespace)
-            try {
-                statement.trueBlock.accept(this)
-            } finally {
-                currentNamespace = currentNamespace.enclosingNamespace!!
-            }
-        }
-        else {
-            currentNamespace = Namespace(currentNamespace)
-            try {
-                statement.falseBlock?.accept(this) ?: 0
-            } finally {
-                currentNamespace = currentNamespace.enclosingNamespace!!
-            }
+            inNewNamespace { statement.trueBlock.accept(this) }
+        } else {
+            inNewNamespace { statement.falseBlock?.accept(this) ?: 0 }
         }
     }
 
@@ -153,27 +137,27 @@ class InterpretingVisitor: ASTVisitor<Int>() {
     }
 
     override fun visit(expression: FunctionCallExpression): Int {
-        if (expression.name.name == "println")
+        if (expression.identifier.name == "println")
             return visitPrintlnFunction(expression)
 
         val declaration = currentNamespace.getFunctionByCall(expression)
-        currentNamespace = Namespace(currentNamespace)
-        for (i in declaration.parameters.indices) {
-            val av = expression.arguments[i].accept(this)
-            currentNamespace.addVariable(declaration.parameters[i], av)
+        return inNewNamespace {
+            for (i in declaration.parameters.indices) {
+                val av = expression.arguments[i].accept(this)
+                currentNamespace.addVariable(declaration.parameters[i], av)
+            }
+            inNewNamespace {
+                try {
+                    declaration.body.accept(this)
+                } catch (e: ReturnFoundException) {
+                    e.value
+                }
+            }
         }
-        currentNamespace = Namespace(currentNamespace)
-        val functionCallResult = try {
-            declaration.body.accept(this)
-        } catch (e: ReturnFoundException) {
-            e.value
-        }
-        currentNamespace = currentNamespace.enclosingNamespace!!.enclosingNamespace!!
-        return functionCallResult
     }
 
     override fun visit(expression: UnarySignedExpression): Int {
-        val expressionResult = expression.expression.accept(this)
+        val expressionResult = expression.signedSubexpression.accept(this)
         return when (expression.sign) {
             Sign.PLUS -> expressionResult
             Sign.MINUS -> -expressionResult
@@ -193,4 +177,17 @@ class InterpretingVisitor: ASTVisitor<Int>() {
 
     private fun Int.toBool() = this != 0
     private fun Boolean.toInt() = if (this) 1 else 0
+
+    /**
+     * The !! operator is null-safe here, because enclosing namespace
+     * links with the current namespace in the first line of that function.
+     */
+    private fun inNewNamespace(block: () -> Int): Int {
+        currentNamespace = Namespace(currentNamespace)
+        try {
+            return block()
+        } finally {
+            currentNamespace = currentNamespace.enclosingNamespace!!
+        }
+    }
 }
