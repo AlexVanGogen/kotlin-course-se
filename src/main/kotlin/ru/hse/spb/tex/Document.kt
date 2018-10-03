@@ -47,7 +47,7 @@ package ru.hse.spb.tex
  *
  * Note that `usePackage` method must accept at least 1 parameter.
  */
-class Document: TexCommand("document") {
+class Document: TexTag(TagKind.ENVIRONMENT, "document") {
 
     private var docClass: String? = null
     private var isPackagesInitialized = false
@@ -73,7 +73,7 @@ class Document: TexCommand("document") {
             declaredPackagesList.add(nextPackage)
         }
         isPackagesInitialized = true
-        append("\\begin{$commandName}")
+        append("\\begin{$tagName}")
     }
 
     fun frame(frameTitle: String, init: Frame.() -> Unit): Frame {
@@ -81,11 +81,9 @@ class Document: TexCommand("document") {
             throw DocumentClassNotDefinedException()
         }
         val frame = Frame(frameTitle)
-        frame.nested(scoped = false) {
-            frame.append("\\begin{${frame.commandName}}")
+        frame.nested(newIndentForEnvironment = true) {
             frame.append("\\frametitle{${frame.frameTitle}}")
-            frame.nested(scoped = false) { frame.init() }
-            frame.append("\\end{${frame.commandName}}")
+            frame.init()
         }
         return frame
     }

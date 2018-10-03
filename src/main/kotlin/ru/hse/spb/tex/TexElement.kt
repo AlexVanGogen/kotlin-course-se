@@ -1,9 +1,9 @@
 package ru.hse.spb.tex
 
 /**
- * Any command that can contain text/formula/enumeration/etc.
+ * Any tag that can contain text/formula/enumeration/etc.
  */
-abstract class ContentHolderCommand(override val commandName: String): TexCommand(commandName) {
+abstract class ContentHolderTag(override val kind: TagKind, override val tagName: String): TexTag(kind, tagName) {
 
     fun itemize(init: ItemContainer.() -> Unit) {
         val itemContainer = ItemContainer("itemize")
@@ -34,11 +34,11 @@ abstract class ContentHolderCommand(override val commandName: String): TexComman
     }
 }
 
-abstract class EnumerableCommand(override val commandName: String): TexCommand(commandName) {
+abstract class EnumerableTag(override val tagName: String): TexTag(TagKind.ENVIRONMENT, tagName) {
     fun item(init: Item.() -> Unit) {
         val item = Item()
-        item.append("\\${item.commandName}")
-        item.nested(scoped = false) { item.init() }
+        item.append("\\${item.tagName}")
+        item.nested { item.init() }
     }
 }
 
@@ -48,26 +48,26 @@ enum class AlignmentKind {
     RIGHT
 }
 
-class Alignment(override val commandName: String): TexCommand(commandName) {
+class Alignment(override val tagName: String): TexTag(TagKind.ENVIRONMENT, tagName) {
     operator fun String.unaryPlus() {
         append(this)
     }
 }
 
-class Frame(val frameTitle: String): ContentHolderCommand("frame")
+class Frame(val frameTitle: String): ContentHolderTag(TagKind.ENVIRONMENT, "frame")
 
-class ItemContainer(override val commandName: String): EnumerableCommand(commandName)
+class ItemContainer(override val tagName: String): EnumerableTag(tagName)
 
-class Item: ContentHolderCommand("item")
+class Item: ContentHolderTag(TagKind.COMMAND, "item")
 
 /**
- * According to requirements to DSL, `documentclass` and `usepackage` commands must be used
- * inside block for `document` command, but in TeX `\documentclass` and `\usepackage` commands
- * are declared outside `\begin{document}...\end{document}` frame.
+ * According to requirements to DSL, `documentclass` and `usepackage` tags must be used
+ * inside block for `document` tag, but in TeX `\documentclass` and `\usepackage` tahs
+ * are declared outside `\begin{document}...\end{document}` environment.
  */
 fun document(init: Document.() -> Unit): Document {
     val document = Document()
     document.init()
-    document.append("\\end{${document.commandName}}")
+    document.append("\\end{${document.tagName}}")
     return document
 }

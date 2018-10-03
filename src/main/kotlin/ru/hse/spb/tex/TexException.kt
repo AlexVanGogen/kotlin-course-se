@@ -12,4 +12,4 @@ class DuplicatePackageException(packageName: String)
     : TexException("Duplicated package declaration: $packageName")
 
 class DocumentClassNotDefinedException
-    : TexException("`frame` was found but `documentClass` command was not defined")
+    : TexException("`frame` was found but `documentClass` tag was not defined")
