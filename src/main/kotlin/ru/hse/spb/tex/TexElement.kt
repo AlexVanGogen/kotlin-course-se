@@ -6,21 +6,27 @@ package ru.hse.spb.tex
 abstract class ContentHolderCommand(override val commandName: String): TexCommand(commandName) {
 
     fun itemize(init: ItemContainer.() -> Unit) {
-        val itemContainer = ItemContainer()
-        itemContainer.append("\\begin{itemize}")
+        val itemContainer = ItemContainer("itemize")
         itemContainer.nested { itemContainer.init() }
-        itemContainer.append("\\end{itemize}")
     }
 
     fun enumerate(init: ItemContainer.() -> Unit) {
-        val itemContainer = ItemContainer()
-        itemContainer.append("\\begin{enumerate}")
+        val itemContainer = ItemContainer("enumerate")
         itemContainer.nested { itemContainer.init() }
-        itemContainer.append("\\end{enumerate}")
     }
 
     fun math(formula: String) {
         append("$$formula$")
+    }
+
+    fun alignment(kind: AlignmentKind, init: Alignment.() -> Unit) {
+        val texAlignmentCommand = when (kind) {
+            AlignmentKind.LEFT -> "flushleft"
+            AlignmentKind.CENTER -> "center"
+            AlignmentKind.RIGHT -> "flushright"
+        }
+        val alignment = Alignment(texAlignmentCommand)
+        alignment.nested { alignment.init() }
     }
 
     operator fun String.unaryPlus() {
@@ -28,24 +34,29 @@ abstract class ContentHolderCommand(override val commandName: String): TexComman
     }
 }
 
-class Frame(val frameTitle: String): TexCommand("frame") {
-
-    fun itemize(init: ItemContainer.() -> Unit) {
-        val itemContainer = ItemContainer()
-        itemContainer.append("\\begin{itemize}")
-        itemContainer.nested { itemContainer.init() }
-        itemContainer.append("\\end{itemize}")
-    }
-}
-
-class ItemContainer: TexCommand("itemize") {
-
+abstract class EnumerableCommand(override val commandName: String): TexCommand(commandName) {
     fun item(init: Item.() -> Unit) {
         val item = Item()
-        item.append("\\item ")
-        item.nested { item.init() }
+        item.append("\\${item.commandName}")
+        item.nested(scoped = false) { item.init() }
     }
 }
+
+enum class AlignmentKind {
+    LEFT,
+    CENTER,
+    RIGHT
+}
+
+class Alignment(override val commandName: String): TexCommand(commandName) {
+    operator fun String.unaryPlus() {
+        append(this)
+    }
+}
+
+class Frame(val frameTitle: String): ContentHolderCommand("frame")
+
+class ItemContainer(override val commandName: String): EnumerableCommand(commandName)
 
 class Item: ContentHolderCommand("item")
 

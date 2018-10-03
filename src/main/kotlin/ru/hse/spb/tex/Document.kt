@@ -74,7 +74,6 @@ class Document: TexCommand("document") {
         }
         isPackagesInitialized = true
         append("\\begin{$commandName}")
-
     }
 
     fun frame(frameTitle: String, init: Frame.() -> Unit): Frame {
@@ -82,10 +81,10 @@ class Document: TexCommand("document") {
             throw DocumentClassNotDefinedException()
         }
         val frame = Frame(frameTitle)
-        nested {
+        frame.nested(scoped = false) {
             frame.append("\\begin{${frame.commandName}}")
             frame.append("\\frametitle{${frame.frameTitle}}")
-            frame.nested { frame.init() }
+            frame.nested(scoped = false) { frame.init() }
             frame.append("\\end{${frame.commandName}}")
         }
         return frame

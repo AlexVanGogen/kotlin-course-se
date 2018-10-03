@@ -1,5 +1,6 @@
 package ru.hse.spb
 
+import ru.hse.spb.tex.AlignmentKind
 import ru.hse.spb.tex.document
 
 fun main(args: Array<String>) {
@@ -21,6 +22,9 @@ fun main(args: Array<String>) {
                     +"We have the following formula:"
                     math("x=3y^2")
                 }
+            }
+            alignment(AlignmentKind.RIGHT) {
+                +"Lorem ipsum dolor sit amet, blablabla"
             }
         }
         frame(frameTitle = "frame title 2") {

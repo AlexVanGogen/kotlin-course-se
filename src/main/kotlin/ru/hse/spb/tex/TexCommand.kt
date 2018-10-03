@@ -21,10 +21,14 @@ abstract class TexCommand(open val commandName: String) {
         documentBuilder.appendln(text)
     }
 
-    fun nested(block: () -> Unit) {
+    fun nested(scoped: Boolean = true, block: () -> Unit) {
+        if (scoped)
+            append("\\begin{$commandName}")
         indent++
         block()
         indent--
+        if (scoped)
+            append("\\end{$commandName}")
     }
 
     override fun toString() = documentBuilder.toString()
