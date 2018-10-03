@@ -19,7 +19,10 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         printWithIndent("Function declaration", indent)
         withIndent {
             declaration.identifier.accept(this)
-            declaration.parameters.forEach { it.accept(this) }
+            printWithIndent("Parameters", indent)
+            withIndent {
+                declaration.parameters.forEach { it.accept(this) }
+            }
             declaration.body.accept(this)
         }
     }
@@ -65,7 +68,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
     }
 
     override fun visit(expression: MultiplicativeExpression) {
-        printWithIndent("Multiplicative signedSubexpression", indent)
+        printWithIndent("Multiplicative expression", indent)
         withIndent {
             printWithIndent("Operator: ${expression.operator}", indent)
             expression.left.accept(this)
@@ -74,7 +77,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
     }
 
     override fun visit(expression: AdditiveExpression) {
-        printWithIndent("Additive signedSubexpression", indent)
+        printWithIndent("Additive expression", indent)
         withIndent {
             printWithIndent("Operator: ${expression.operator}", indent)
             expression.left.accept(this)
@@ -83,7 +86,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
     }
 
     override fun visit(expression: ComparisonExpression) {
-        printWithIndent("Comparison signedSubexpression", indent)
+        printWithIndent("Comparison expression", indent)
         withIndent {
             printWithIndent("Operator: ${expression.operator}", indent)
             expression.left.accept(this)
@@ -92,7 +95,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
     }
 
     override fun visit(expression: LogicalExpression) {
-        printWithIndent("Logical signedSubexpression", indent)
+        printWithIndent("Logical expression", indent)
         withIndent {
             printWithIndent("Operator: ${expression.operator}", indent)
             expression.left.accept(this)
@@ -104,12 +107,15 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         printWithIndent("Function call", indent)
         withIndent {
             expression.identifier.accept(this)
-            expression.arguments.forEach { it.accept(this) }
+            printWithIndent("Arguments", indent)
+            withIndent {
+                expression.arguments.forEach { it.accept(this) }
+            }
         }
     }
 
     override fun visit(expression: UnarySignedExpression) {
-        printWithIndent("Unary signed signedSubexpression", indent)
+        printWithIndent("Unary signed expression", indent)
         withIndent {
             printWithIndent("Sign: ${expression.sign}", indent)
             expression.signedSubexpression.accept(this)
@@ -117,11 +123,11 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
     }
 
     override fun visit(identifier: Identifier) {
-        printWithIndent("Name: ${identifier.name}", indent)
+        printWithIndent("Identifier, name: ${identifier.name}", indent)
     }
 
     override fun visit(literal: Literal) {
-        printWithIndent("Value: ${literal.valueAsString}", indent)
+        printWithIndent("Literal, value: ${literal.valueAsString}", indent)
     }
 
     private fun printWithIndent(str: String, indent: Int) {
