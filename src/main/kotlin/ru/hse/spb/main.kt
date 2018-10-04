@@ -1,13 +1,14 @@
 package ru.hse.spb
 
 import ru.hse.spb.tex.AlignmentKind
+import ru.hse.spb.tex.TagKind
 import ru.hse.spb.tex.document
 
 fun main(args: Array<String>) {
     println(document {
         documentClass("beamer")
-        usePackage("babel", "russian")
-        frame(frameTitle = "frame title") {
+        usePackage("babel")
+        frame("frame title", "arg1" to "v1", "arg2" to "v2") {
             itemize {
                 item { +"item 1" }
                 item {
@@ -28,7 +29,12 @@ fun main(args: Array<String>) {
             }
         }
         frame(frameTitle = "frame title 2") {
-
+            customTag(TagKind.ENVIRONMENT, "pyglist", "language" to "kotlin", "encoding" to "utf8") {
+                +"""
+                    val x = 1
+                    println(x + 2)
+                """.trimIndent()
+            }
         }
     }.toString())
 }

@@ -12,6 +12,8 @@ enum class TagKind {
     ENVIRONMENT
 }
 
+typealias NamedParameter = Pair<String, Any>
+
 @DslMarker
 annotation class TexCommandMarker
 
@@ -19,7 +21,7 @@ annotation class TexCommandMarker
  * Superclass for all TeX tags.
  */
 @TexCommandMarker
-abstract class TexTag(open val kind: TagKind, open val tagName: String) {
+abstract class TexTag(open val kind: TagKind, open val tagName: String, open val params: Array<out NamedParameter> = arrayOf()) {
 
     fun append(text: String) {
         documentBuilder.appendln("${"  ".repeat(indent)}$text")
@@ -34,22 +36,35 @@ abstract class TexTag(open val kind: TagKind, open val tagName: String) {
     }
 
     fun nested(newIndentForEnvironment: Boolean = false, block: () -> Unit) {
-        if (kind == TagKind.ENVIRONMENT) {
-            if (newIndentForEnvironment)
-                indent++
-            append("\\begin{$tagName}")
-        }
-        indent++
-        block()
-        indent--
-        if (kind == TagKind.ENVIRONMENT) {
-            if (newIndentForEnvironment)
-                indent--
-            append("\\end{$tagName}")
+        when (kind) {
+            TagKind.COMMAND -> nestedCommand(block)
+            TagKind.ENVIRONMENT -> nestedEnvironment(newIndentForEnvironment, block)
         }
     }
 
     override fun toString() = documentBuilder.toString()
+
+    private fun makeParametersList() = if (params.isEmpty()) "" else params.joinToString(", ", "[", "]") { "${it.first}=${it.second}" }
+
+    private fun nestedEnvironment(isNewIndentNeeded: Boolean = false, block: () -> Unit) {
+        if (isNewIndentNeeded)
+            indent++
+        append("\\begin{$tagName}${makeParametersList()}")
+        indent++
+        block()
+        indent--
+        append("\\end{$tagName}")
+        if (isNewIndentNeeded)
+            indent--
+    }
+
+    private fun nestedCommand(block: () -> Unit) {
+        append("\\$tagName${makeParametersList()}{")
+        indent++
+        block()
+        indent--
+        append("}")
+    }
 
     companion object {
         private val documentBuilder = StringBuilder()

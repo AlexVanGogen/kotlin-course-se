@@ -76,11 +76,11 @@ class Document: TexTag(TagKind.ENVIRONMENT, "document") {
         append("\\begin{$tagName}")
     }
 
-    fun frame(frameTitle: String, init: Frame.() -> Unit): Frame {
+    fun frame(frameTitle: String, vararg params: NamedParameter, init: Frame.() -> Unit): Frame {
         if (docClass == null) {
             throw DocumentClassNotDefinedException()
         }
-        val frame = Frame(frameTitle)
+        val frame = Frame(frameTitle, params)
         frame.nested(newIndentForEnvironment = true) {
             frame.append("\\frametitle{${frame.frameTitle}}")
             frame.init()
