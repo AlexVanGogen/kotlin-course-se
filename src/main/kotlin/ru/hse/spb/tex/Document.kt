@@ -1,12 +1,14 @@
 package ru.hse.spb.tex
 
+typealias Package = Pair<String, String?>
+
 /**
  * Command that encloses `document` namespace.
  * Only following sequence of commands is allowed:
  *
  * document {
  *     documentClass(class)
- *     usePackage(package1, package2, ..., packageN)
+ *     usePackage(!package1, package2 to option2, ..., !packageN)
  *     frame(frameTitle1) { ... }
  *     frame(frameTitle2) { ... }
  *     frame(frameTitle3) { ... }
@@ -18,30 +20,30 @@ package ru.hse.spb.tex
  *
  * \documentclass{class}
  * \usepackage{package1}
- * \usepackage{package2}
+ * \usepackage\[option2\]{package2}
  * ...
  * \usepackage{packageN}
  * \begin{document}
  *     \begin{frame}
- *     \frametitle{frameTitle1}
- *         ...
+ *         \frametitle{frameTitle1}
+ *             ...
  *     \end{frame}
  *
  *     \begin{frame}
- *     \frametitle{frameTitle2}
- *         ...
+ *         \frametitle{frameTitle2}
+ *             ...
  *     \end{frame}
  *
  *     \begin{frame}
- *     \frametitle{frameTitle3}
- *         ...
+ *         \frametitle{frameTitle3}
+ *             ...
  *     \end{frame}
  *
  *     ...
  *
  *     \begin{frame}
- *     \frametitle{frameTitleM}
- *         ...
+ *         \frametitle{frameTitleM}
+ *             ...
  *     \end{frame}
  * \end{document}
  *
@@ -61,16 +63,16 @@ class Document: TexTag(TagKind.ENVIRONMENT, "document") {
         docClass = className
     }
 
-    fun usePackage(firstPackage: String, vararg otherPackages: String) {
+    fun usePackage(firstPackage: Package, vararg otherPackages: Package) {
         if (isPackagesInitialized || docClass == null)
             throw IllegalPackageDefinitionPlaceException()
-        append("\\usepackage{$firstPackage}")
-        declaredPackagesList.add(firstPackage)
+        append(firstPackage.makeTag())
+        declaredPackagesList.add(firstPackage.first)
         for (nextPackage in otherPackages) {
-            if (nextPackage in declaredPackagesList)
-                throw DuplicatePackageException(nextPackage)
-            append("\\usepackage{$nextPackage}")
-            declaredPackagesList.add(nextPackage)
+            if (nextPackage.first in declaredPackagesList)
+                throw DuplicatePackageException(nextPackage.first)
+            append(nextPackage.makeTag())
+            declaredPackagesList.add(nextPackage.first)
         }
         isPackagesInitialized = true
         append("\\begin{$tagName}")
@@ -87,4 +89,10 @@ class Document: TexTag(TagKind.ENVIRONMENT, "document") {
         }
         return frame
     }
+
+    fun Package.makeTag(): String {
+        return "\\usepackage${if (second == null) "" else "[$second]"}{$first}"
+    }
+
+    operator fun String.not() = Package(this, null)
 }

@@ -7,7 +7,7 @@ import ru.hse.spb.tex.document
 fun main(args: Array<String>) {
     println(document {
         documentClass("beamer")
-        usePackage("babel")
+        usePackage(!"babel", "fontenc" to "T1", "inputenc" to "utf8", !"pythontex")
         frame("frame title", "arg1" to "v1", "arg2" to "v2") {
             itemize {
                 item { +"item 1" }
@@ -29,7 +29,7 @@ fun main(args: Array<String>) {
             }
         }
         frame(frameTitle = "frame title 2") {
-            customTag(TagKind.ENVIRONMENT, "pyglist", "language" to "kotlin", "encoding" to "utf8") {
+            customTag(TagKind.ENVIRONMENT, "pyglist", "language" to "python", "encoding" to "utf8") {
                 +"""
                     val x = 1
                     println(x + 2)
