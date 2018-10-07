@@ -3,6 +3,7 @@ package ru.hse.spb.tex
 /**
  * Any tag that can contain text/formula/enumeration/etc.
  */
+@TexCommandMarker
 abstract class ContentHolderTag(
         override val kind: TagKind,
         override val tagName: String,
@@ -51,6 +52,7 @@ abstract class ContentHolderTag(
     }
 }
 
+@TexCommandMarker
 abstract class EnumerableTag(override val tagName: String): TexTag(TagKind.ENVIRONMENT, tagName) {
     fun item(init: Item.() -> Unit) {
         val item = Item()
@@ -64,26 +66,18 @@ enum class AlignmentKind {
     RIGHT
 }
 
+@TexCommandMarker
 class Alignment(override val tagName: String): TexTag(TagKind.ENVIRONMENT, tagName) {
     operator fun String.unaryPlus() {
         append(this)
     }
 }
 
+@TexCommandMarker
 class Frame(val frameTitle: String, override val params: Array<out NamedParameter>): ContentHolderTag(TagKind.ENVIRONMENT, "frame", params)
 
+@TexCommandMarker
 class ItemContainer(override val tagName: String): EnumerableTag(tagName)
 
+@TexCommandMarker
 class Item: ContentHolderTag(TagKind.COMMAND, "item")
-
-/**
- * According to requirements to DSL, `documentclass` and `usepackage` tags must be used
- * inside block for `document` tag, but in TeX `\documentclass` and `\usepackage` tahs
- * are declared outside `\begin{document}...\end{document}` environment.
- */
-fun document(init: Document.() -> Unit): Document {
-    val document = Document()
-    document.init()
-    document.append("\\end{${document.tagName}}")
-    return document
-}

@@ -13,9 +13,9 @@ fun main(args: Array<String>) {
                 item { +"item 1" }
                 item {
                     itemize {
-                        item { +"subitem 1" }
-                        item { +"subitem 2" }
-                        item { +"subitem 3" }
+                        for (i in 1..5) {
+                            item { +"subitem $i" }
+                        }
                     }
                 }
                 item { +"item 3" }

@@ -44,6 +44,11 @@ abstract class TexTag(open val kind: TagKind, open val tagName: String, open val
 
     override fun toString() = documentBuilder.toString()
 
+    protected fun resetBuilder() {
+        documentBuilder.setLength(0)
+        indent = 0
+    }
+
     private fun makeParametersList() = if (params.isEmpty()) "" else params.joinToString(", ", "[", "]") { "${it.first}=${it.second}" }
 
     private fun nestedEnvironment(isNewIndentNeeded: Boolean = false, block: () -> Unit) {
