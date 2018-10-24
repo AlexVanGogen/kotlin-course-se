@@ -7,5 +7,5 @@ pluginManagement {
         }
     }
 }
-rootProject.name = '01-just-for-fun'
+rootProject.name = '04-fun-debugger'
 
