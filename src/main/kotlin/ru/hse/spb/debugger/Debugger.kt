@@ -7,10 +7,6 @@ import ru.hse.spb.interpreter.ReturnFoundException
 import ru.hse.spb.interpreter.ast.*
 import kotlin.coroutines.experimental.*
 
-/**
- * Language debugger.
- * Debugging process encapsulated
- */
 class Debugger {
 
     /**
