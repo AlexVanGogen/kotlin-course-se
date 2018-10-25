@@ -2,6 +2,7 @@ package ru.hse.spb.interpreter
 
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.Lexer
 import ru.hse.spb.antlr.LalalangParser
 import ru.hse.spb.interpreter.ast.ASTElement
 import ru.hse.spb.interpreter.ast.CustomASTMapper
@@ -11,6 +12,15 @@ class ASTFactory {
     companion object {
         fun fromFile(codeFile: String): ASTElement {
             val lexer = SafeLalalangLexer(CharStreams.fromFileName(codeFile))
+            return provideAST(lexer)
+        }
+
+        fun fromString(codeString: String): ASTElement {
+            val lexer = SafeLalalangLexer(CharStreams.fromString(codeString))
+            return provideAST(lexer)
+        }
+
+        private fun provideAST(lexer: Lexer): ASTElement {
             val tokens = CommonTokenStream(lexer)
             val parser = LalalangParser(tokens)
             parser.errorHandler = ParsingErrorStrategy()

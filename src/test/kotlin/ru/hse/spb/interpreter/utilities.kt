@@ -7,7 +7,7 @@ import ru.hse.spb.antlr.LalalangParser
 import ru.hse.spb.interpreter.ast.*
 import ru.hse.spb.interpreter.errors.ParsingErrorStrategy
 
-internal fun eval(code: String): Int {
+internal suspend fun eval(code: String): Int {
     return ASTFactory.fromString(code).accept(InterpretingVisitor())
 }
 

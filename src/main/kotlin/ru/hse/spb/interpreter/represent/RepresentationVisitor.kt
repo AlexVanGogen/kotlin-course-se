@@ -4,18 +4,18 @@ import ru.hse.spb.interpreter.ast.*
 
 class RepresentationVisitor: ASTVisitor<Unit>() {
 
-    override fun visit(file: File) {
+    override suspend fun visit(file: File) {
         file.block.accept(this)
     }
 
-    override fun visit(block: Block) {
+    override suspend fun visit(block: Block) {
         printWithIndent("Block", indent)
         withIndent {
             block.statementList.forEach { it.accept(this) }
         }
     }
 
-    override fun visit(declaration: FunctionDeclaration) {
+    override suspend fun visit(declaration: FunctionDeclaration) {
         printWithIndent("Function declaration", indent)
         withIndent {
             declaration.identifier.accept(this)
@@ -27,7 +27,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(declaration: VariableDeclaration) {
+    override suspend fun visit(declaration: VariableDeclaration) {
         printWithIndent("Variable declaration", indent)
         withIndent {
             declaration.identifier.accept(this)
@@ -35,7 +35,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(statement: WhileStatement) {
+    override suspend fun visit(statement: WhileStatement) {
         printWithIndent("While statement", indent)
         withIndent {
             statement.condition.accept(this)
@@ -43,7 +43,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(statement: IfStatement) {
+    override suspend fun visit(statement: IfStatement) {
         printWithIndent("If statement", indent)
         withIndent {
             statement.condition.accept(this)
@@ -52,7 +52,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(statement: AssignmentStatement) {
+    override suspend fun visit(statement: AssignmentStatement) {
         printWithIndent("Assignment statement", indent)
         withIndent {
             statement.variableName.accept(this)
@@ -60,14 +60,14 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(statement: ReturnStatement) {
+    override suspend fun visit(statement: ReturnStatement) {
         printWithIndent("Return statement", indent)
         withIndent {
             statement.expression.accept(this)
         }
     }
 
-    override fun visit(expression: MultiplicativeExpression) {
+    override suspend fun visit(expression: MultiplicativeExpression) {
         printWithIndent("Multiplicative expression", indent)
         withIndent {
             printWithIndent("Operator: ${expression.operator}", indent)
@@ -76,7 +76,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(expression: AdditiveExpression) {
+    override suspend fun visit(expression: AdditiveExpression) {
         printWithIndent("Additive expression", indent)
         withIndent {
             printWithIndent("Operator: ${expression.operator}", indent)
@@ -85,7 +85,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(expression: ComparisonExpression) {
+    override suspend fun visit(expression: ComparisonExpression) {
         printWithIndent("Comparison expression", indent)
         withIndent {
             printWithIndent("Operator: ${expression.operator}", indent)
@@ -94,7 +94,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(expression: LogicalExpression) {
+    override suspend fun visit(expression: LogicalExpression) {
         printWithIndent("Logical expression", indent)
         withIndent {
             printWithIndent("Operator: ${expression.operator}", indent)
@@ -103,7 +103,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(expression: FunctionCallExpression) {
+    override suspend fun visit(expression: FunctionCallExpression) {
         printWithIndent("Function call", indent)
         withIndent {
             expression.identifier.accept(this)
@@ -114,7 +114,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(expression: UnarySignedExpression) {
+    override suspend fun visit(expression: UnarySignedExpression) {
         printWithIndent("Unary signed expression", indent)
         withIndent {
             printWithIndent("Sign: ${expression.sign}", indent)
@@ -122,11 +122,11 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(identifier: Identifier) {
+    override suspend fun visit(identifier: Identifier) {
         printWithIndent("Identifier, name: ${identifier.name}", indent)
     }
 
-    override fun visit(literal: Literal) {
+    override suspend fun visit(literal: Literal) {
         printWithIndent("Literal, value: ${literal.valueAsString}", indent)
     }
 
@@ -136,7 +136,7 @@ class RepresentationVisitor: ASTVisitor<Unit>() {
 
     private var indent = 0
 
-    private fun withIndent(block: () -> Unit) {
+    private suspend fun withIndent(block: suspend () -> Unit) {
         indent++
         block()
         indent--

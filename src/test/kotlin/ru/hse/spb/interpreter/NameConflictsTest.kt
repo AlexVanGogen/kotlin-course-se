@@ -1,5 +1,6 @@
 package ru.hse.spb.interpreter
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,10 +13,12 @@ import ru.hse.spb.interpreter.naming.DuplicatedFunctionException
 import ru.hse.spb.interpreter.naming.DuplicatedVariableException
 import ru.hse.spb.interpreter.naming.FunctionNotFoundException
 import ru.hse.spb.interpreter.naming.VariableNotFoundException
+import kotlin.coroutines.experimental.RestrictsSuspension
 
 /**
  * Test correctness of name resolving.
  */
+@RestrictsSuspension
 class NameConflictsTest {
 
     @Test
@@ -151,13 +154,13 @@ class NameConflictsTest {
     }
 
     private fun evaluate(code: String): Int {
-        val parser = ASTFactory.fromString(code)
+        val parser = ASTFactory.getFromString(code)
         val visitor = CustomASTMapper()
         val file = visitor.visitFile(parser.file())
-        return file.accept(InterpretingVisitor())
+        return runBlocking { file.accept(InterpretingVisitor()) }
     }
 
-    private fun ASTFactory.Companion.fromString(code: String): LalalangParser {
+    private fun ASTFactory.Companion.getFromString(code: String): LalalangParser {
         val lexer = SafeLalalangLexer(CharStreams.fromString(code))
         val tokens = CommonTokenStream(lexer)
         val parser = LalalangParser(tokens)

@@ -1,5 +1,6 @@
 package ru.hse.spb.interpreter
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.antlr.v4.runtime.CommonToken
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -232,7 +233,9 @@ class ASTInterpretingTest {
         )
     }
 
-    private fun ASTElement.eval() = accept(InterpretingVisitor())
+    private fun ASTElement.eval(): Int = runBlocking {
+        return@runBlocking accept(InterpretingVisitor())
+    }
 
     private val fakeToken = CommonToken(0)
     private fun IdentifierExpression.Companion.of(variableName: String) = I(Identifier(variableName, fakeToken))

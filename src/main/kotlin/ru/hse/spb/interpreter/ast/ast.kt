@@ -3,10 +3,10 @@ package ru.hse.spb.interpreter.ast
 import org.antlr.v4.runtime.Token
 import ru.hse.spb.interpreter.getLocation
 
-sealed class BasicLanguageElement
+sealed class BasicLanguageElement(open val lineNumber: Int = 0)
 
 interface ASTElement {
-    fun <R> accept(visitor: ASTVisitor<R>): R
+    suspend fun <R> accept(visitor: ASTVisitor<R>): R
 }
 
 interface Named {
@@ -17,24 +17,28 @@ interface Named {
 class File(
         val block: Block
 ): BasicLanguageElement(), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class Block(
-        val statementList: List<Statement>
+        val statementList: List<Statement>,
+        override val lineNumber: Int = 0
 ): BasicLanguageElement(), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
-sealed class Statement: BasicLanguageElement(), ASTElement
+sealed class Statement(
+        override val lineNumber: Int = 0
+): BasicLanguageElement(lineNumber), ASTElement
 
 class FunctionDeclaration(
         val identifier: Identifier,
         val parameters: List<Identifier>,
-        val body: Block
-): Statement(), ASTElement {
+        val body: Block,
+        override val lineNumber: Int = 0
+): Statement(lineNumber), ASTElement {
     val signature: String = "${identifier.name}(${List(parameters.size) { "int" }.joinToString(separator = ", ")})"
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class ParameterNames(
@@ -43,46 +47,54 @@ class ParameterNames(
 
 class VariableDeclaration(
         val identifier: Identifier,
-        val assignedExpression: Expression?
-): Statement(), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+        val assignedExpression: Expression?,
+        override val lineNumber: Int = 0
+): Statement(lineNumber), ASTElement {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class WhileStatement(
         val condition: Expression,
-        val body: Block
-): Statement(), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+        val body: Block,
+        override val lineNumber: Int = 0
+): Statement(lineNumber), ASTElement {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class IfStatement(
         val condition: Expression,
         val trueBlock: Block,
-        val falseBlock: Block?
-): Statement(), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+        val falseBlock: Block?,
+        override val lineNumber: Int = 0
+): Statement(lineNumber), ASTElement {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class AssignmentStatement(
         val variableName: Identifier,
-        val assignedExpression: Expression
-): Statement(), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+        val assignedExpression: Expression,
+        override val lineNumber: Int = 0
+): Statement(lineNumber), ASTElement {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class ReturnStatement(
-        val expression: Expression
-): Statement(), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+        val expression: Expression,
+        override val lineNumber: Int = 0
+): Statement(lineNumber), ASTElement {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
-sealed class Expression: Statement()
+sealed class Expression(
+        override val lineNumber: Int = 0
+): Statement(lineNumber)
 
 sealed class BinaryExpression(
         open val left: Expression,
         open val operator: OperatorType,
-        open val right: Expression
-): Expression()
+        open val right: Expression,
+        override val lineNumber: Int = 0
+): Expression(lineNumber)
 
 enum class OperatorType(val symbol: String) {
     PLUS("+"),
@@ -112,42 +124,47 @@ enum class OperatorType(val symbol: String) {
 class MultiplicativeExpression(
         override val left: Expression,
         override val operator: OperatorType,
-        override val right: Expression
-): BinaryExpression(left, operator, right), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+        override val right: Expression,
+        override val lineNumber: Int = 0
+): BinaryExpression(left, operator, right, lineNumber), ASTElement {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class AdditiveExpression(
         override val left: Expression,
         override val operator: OperatorType,
-        override val right: Expression
-): BinaryExpression(left, operator, right), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+        override val right: Expression,
+        override val lineNumber: Int = 0
+): BinaryExpression(left, operator, right, lineNumber), ASTElement {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class ComparisonExpression(
         override val left: Expression,
         override val operator: OperatorType,
-        override val right: Expression
-): BinaryExpression(left, operator, right), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+        override val right: Expression,
+        override val lineNumber: Int = 0
+): BinaryExpression(left, operator, right, lineNumber), ASTElement {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class LogicalExpression(
         override val left: Expression,
         override val operator: OperatorType,
-        override val right: Expression
-): BinaryExpression(left, operator, right), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+        override val right: Expression,
+        override val lineNumber: Int = 0
+): BinaryExpression(left, operator, right, lineNumber), ASTElement {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class FunctionCallExpression(
         val identifier: Identifier,
-        val arguments: List<Expression>
-): Expression(), ASTElement {
+        val arguments: List<Expression>,
+        override val lineNumber: Int = 0
+): Expression(lineNumber), ASTElement {
     val signature: String = "${identifier.name}(${List(arguments.size) { "int" }.joinToString(separator = ", ")})"
     
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class Arguments(
@@ -156,9 +173,10 @@ class Arguments(
 
 class UnarySignedExpression(
         val signedSubexpression: Expression,
-        val sign: Sign
-): Expression(), ASTElement {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+        val sign: Sign,
+        override val lineNumber: Int = 0
+): Expression(lineNumber), ASTElement {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 enum class Sign(val symbol: String) {
@@ -171,9 +189,10 @@ enum class Sign(val symbol: String) {
 }
 
 class IdentifierExpression(
-        val identifier: Identifier
-): Expression() {
-    override fun <R> accept(visitor: ASTVisitor<R>) = identifier.accept(visitor)
+        val identifier: Identifier,
+        override val lineNumber: Int = 0
+): Expression(lineNumber) {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = identifier.accept(visitor)
 
     companion object
 }
@@ -181,14 +200,15 @@ class IdentifierExpression(
 class Identifier(
         val name: String,
         override val correspondingToken: Token
-): BasicLanguageElement(), ASTElement, Named {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+): BasicLanguageElement(correspondingToken.line), ASTElement, Named {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }
 
 class LiteralExpression(
-        val literal: Literal
-): Expression() {
-    override fun <R> accept(visitor: ASTVisitor<R>) = literal.accept(visitor)
+        val literal: Literal,
+        override val lineNumber: Int = 0
+): Expression(lineNumber) {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = literal.accept(visitor)
 
     companion object
 }
@@ -196,6 +216,6 @@ class LiteralExpression(
 class Literal(
         val valueAsString: String,
         override val correspondingToken: Token
-): BasicLanguageElement(), ASTElement, Named {
-    override fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
+): BasicLanguageElement(correspondingToken.line), ASTElement, Named {
+    override suspend fun <R> accept(visitor: ASTVisitor<R>) = visitor.visit(this)
 }

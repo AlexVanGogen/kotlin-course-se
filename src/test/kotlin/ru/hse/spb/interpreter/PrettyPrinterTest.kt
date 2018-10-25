@@ -1,5 +1,6 @@
 package ru.hse.spb.interpreter
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -84,7 +85,7 @@ if (x > 10) { println(2,3,4) } else { println(2*3*4)
 
     private fun prettyPrint(code: String): String {
         val file = ASTFactory.fromString(code)
-        file.accept(PrettyPrintingVisitor())
+        runBlocking { file.accept(PrettyPrintingVisitor()) }
         return byteArrayOutputStream.toString().trim()
     }
 

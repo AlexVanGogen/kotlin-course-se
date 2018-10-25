@@ -1,7 +1,9 @@
 package ru.hse.spb.interpreter
 
+import kotlinx.coroutines.experimental.coroutineScope
 import ru.hse.spb.interpreter.ast.*
 import ru.hse.spb.interpreter.naming.Namespace
+import java.util.*
 
 /**
  * Visitor that interprets given program represented as AST.
@@ -26,12 +28,12 @@ import ru.hse.spb.interpreter.naming.Namespace
  * 7) When interpreter sees an assignment, it first calculates an assigned signedSubexpression,
  *    and just after that checks if variable an signedSubexpression is assigned to, causes no errors.
  */
-class InterpretingVisitor: ASTVisitor<Int>() {
+open class InterpretingVisitor: ASTVisitor<Int>() {
 
     private val topLevelNamespace = Namespace()
     private var currentNamespace = topLevelNamespace
 
-    override fun visit(file: File): Int {
+    override suspend fun visit(file: File): Int {
         return try {
             file.block.accept(this)
         } catch (e: ReturnFoundException) {
@@ -39,7 +41,7 @@ class InterpretingVisitor: ASTVisitor<Int>() {
         }
     }
 
-    override fun visit(block: Block): Int {
+    override suspend fun visit(block: Block): Int {
         for (nextStatement in block.statementList) {
             if (nextStatement is ReturnStatement) {
                 throw ReturnFoundException(nextStatement.accept(this))
@@ -49,18 +51,18 @@ class InterpretingVisitor: ASTVisitor<Int>() {
         return 0
     }
 
-    override fun visit(declaration: FunctionDeclaration): Int {
+    override suspend fun visit(declaration: FunctionDeclaration): Int {
         currentNamespace.addFunction(declaration)
         return 0
     }
 
-    override fun visit(declaration: VariableDeclaration): Int {
+    override suspend fun visit(declaration: VariableDeclaration): Int {
         val assignedExpressionValue = declaration.assignedExpression?.accept(this) ?: 0
         currentNamespace.addVariable(declaration.identifier, assignedExpressionValue)
         return assignedExpressionValue
     }
 
-    override fun visit(statement: WhileStatement): Int {
+    override suspend fun visit(statement: WhileStatement): Int {
         var loopResult = 0
 
         while (statement.condition.accept(this) != 0) {
@@ -72,7 +74,7 @@ class InterpretingVisitor: ASTVisitor<Int>() {
         return loopResult
     }
 
-    override fun visit(statement: IfStatement): Int {
+    override suspend fun visit(statement: IfStatement): Int {
         val conditionResult = statement.condition.accept(this)
         return if (conditionResult != 0) {
             inNewNamespace { statement.trueBlock.accept(this) }
@@ -81,17 +83,17 @@ class InterpretingVisitor: ASTVisitor<Int>() {
         }
     }
 
-    override fun visit(statement: AssignmentStatement): Int {
+    override suspend fun visit(statement: AssignmentStatement): Int {
         currentNamespace.getVariableValue(statement.variableName)
         currentNamespace.updateVariableValue(statement.variableName, statement.assignedExpression.accept(this))
         return 0
     }
 
-    override fun visit(statement: ReturnStatement): Int {
+    override suspend fun visit(statement: ReturnStatement): Int {
         return statement.expression.accept(this)
     }
 
-    override fun visit(expression: MultiplicativeExpression): Int {
+    override suspend fun visit(expression: MultiplicativeExpression): Int {
         val leftValue = expression.left.accept(this)
         val rightValue = expression.right.accept(this)
         return when (expression.operator) {
@@ -102,7 +104,7 @@ class InterpretingVisitor: ASTVisitor<Int>() {
         }
     }
 
-    override fun visit(expression: AdditiveExpression): Int {
+    override suspend fun visit(expression: AdditiveExpression): Int {
         val leftValue = expression.left.accept(this)
         val rightValue = expression.right.accept(this)
         return when (expression.operator) {
@@ -112,7 +114,7 @@ class InterpretingVisitor: ASTVisitor<Int>() {
         }
     }
 
-    override fun visit(expression: ComparisonExpression): Int {
+    override suspend fun visit(expression: ComparisonExpression): Int {
         val leftValue = expression.left.accept(this)
         val rightValue = expression.right.accept(this)
         return when (expression.operator) {
@@ -126,7 +128,7 @@ class InterpretingVisitor: ASTVisitor<Int>() {
         }
     }
 
-    override fun visit(expression: LogicalExpression): Int {
+    override suspend fun visit(expression: LogicalExpression): Int {
         val leftValue = expression.left.accept(this)
         val rightValue = expression.right.accept(this)
         return when (expression.operator) {
@@ -136,7 +138,7 @@ class InterpretingVisitor: ASTVisitor<Int>() {
         }
     }
 
-    override fun visit(expression: FunctionCallExpression): Int {
+    override suspend fun visit(expression: FunctionCallExpression): Int {
         if (expression.identifier.name == "println")
             return visitPrintlnFunction(expression)
 
@@ -156,7 +158,7 @@ class InterpretingVisitor: ASTVisitor<Int>() {
         }
     }
 
-    override fun visit(expression: UnarySignedExpression): Int {
+    override suspend fun visit(expression: UnarySignedExpression): Int {
         val expressionResult = expression.signedSubexpression.accept(this)
         return when (expression.sign) {
             Sign.PLUS -> expressionResult
@@ -164,14 +166,14 @@ class InterpretingVisitor: ASTVisitor<Int>() {
         }
     }
 
-    override fun visit(identifier: Identifier): Int = currentNamespace.getVariableValue(identifier)
+    override suspend fun visit(identifier: Identifier): Int = currentNamespace.getVariableValue(identifier)
 
-    override fun visit(literal: Literal): Int {
+    override suspend fun visit(literal: Literal): Int {
         return literal.valueAsString.toInt()
     }
 
-    private fun visitPrintlnFunction(call: FunctionCallExpression): Int {
-        println(call.arguments.joinToString(" ") { it.accept(this).toString() })
+    private suspend fun visitPrintlnFunction(call: FunctionCallExpression): Int {
+        println(call.arguments.map { it.accept(this).toString() }.joinToString(" "))
         return 0
     }
 
@@ -182,7 +184,7 @@ class InterpretingVisitor: ASTVisitor<Int>() {
      * The !! operator is null-safe here, because enclosing namespace
      * links with the current namespace in the first line of that function.
      */
-    private fun inNewNamespace(block: () -> Int): Int {
+    private suspend fun inNewNamespace(block: suspend () -> Int): Int {
         currentNamespace = Namespace(currentNamespace)
         try {
             return block()

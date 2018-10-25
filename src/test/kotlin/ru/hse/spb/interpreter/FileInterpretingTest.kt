@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class FileInterpretingTest {
 
     @Test
-    internal fun `test literals`() {
+    internal suspend fun `test literals`() {
         val code = """
             1
             2
@@ -21,7 +21,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test literals with return as the last statement`() {
+    internal suspend fun `test literals with return as the last statement`() {
         val code = """
             1
             2
@@ -33,7 +33,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test literals with return as the middle statement`() {
+    internal suspend fun `test literals with return as the middle statement`() {
         val code = """
             1
             2
@@ -45,7 +45,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test expression "2 + 2 * 2"`() {
+    internal suspend fun `test expression "2 + 2 * 2"`() {
         val code = """
             return 2 + 2 * 2
         """.trimIndent()
@@ -53,7 +53,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test expression "(2 + 2) * 2"`() {
+    internal suspend fun `test expression "(2 + 2) * 2"`() {
         val code = """
             return (2 + 2) * 2
         """.trimIndent()
@@ -61,7 +61,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test expression "3 + (4 - 5 % 3) && 1"`() {
+    internal suspend fun `test expression "3 + (4 - 5 % 3) && 1"`() {
         val code = """
             return 3 + (4 - 5 % 3) && 1
         """.trimIndent()
@@ -69,7 +69,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test expression "3 + (4 - 5 % 3) && 0"`() {
+    internal suspend fun `test expression "3 + (4 - 5 % 3) && 0"`() {
         val code = """
             return 3 + (4 - 5 % 3) && 0
         """.trimIndent()
@@ -77,7 +77,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test branching, true condition`() {
+    internal suspend fun `test branching, true condition`() {
         val code = """
             if (3 != 5) {
                 return 2
@@ -89,7 +89,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test branching, false condition, "else" branch exists`() {
+    internal suspend fun `test branching, false condition, "else" branch exists`() {
         val code = """
             if (3 == 5) {
                 return 2
@@ -101,7 +101,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test branching, false condition, "else" branch do not exists`() {
+    internal suspend fun `test branching, false condition, "else" branch do not exists`() {
         val code = """
             if (3 == 5) {
                 return 2
@@ -111,7 +111,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test assignment "var x = 4"`() {
+    internal suspend fun `test assignment "var x = 4"`() {
         val code = """
             var x = 4
             x = -x * 2
@@ -121,7 +121,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test loop 1`() {
+    internal suspend fun `test loop 1`() {
         val code = """
             var i = 0
             while (i < 10) {
@@ -133,7 +133,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test loop 2`() {
+    internal suspend fun `test loop 2`() {
         val code = """
             var i = 0
             while (i < 10) {
@@ -145,7 +145,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test loop 3`() {
+    internal suspend fun `test loop 3`() {
         val code = """
             var i = 0
             while (i < 10) {
@@ -157,7 +157,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test function`() {
+    internal suspend fun `test function`() {
         val code = """
             fun foo(n) {
                 fun bar(m) {
@@ -173,7 +173,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test recursive function`() {
+    internal suspend fun `test recursive function`() {
         val code = """
             fun fib(n) {
                 if (n <= 1) {
@@ -188,7 +188,7 @@ class FileInterpretingTest {
     }
 
     @Test
-    internal fun `test code with comments`() {
+    internal suspend fun `test code with comments`() {
         val code = """
             /**
              * Function that calculates n-th Fibonacci number.

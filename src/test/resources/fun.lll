@@ -1,0 +1,6 @@
+fun sum(m, n, k) {
+    println(m, n, k)
+    return m + n + k
+}
+
+println(sum(1, 2, 3))

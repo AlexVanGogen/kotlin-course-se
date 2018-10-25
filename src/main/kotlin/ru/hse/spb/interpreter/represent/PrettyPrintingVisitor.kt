@@ -4,21 +4,21 @@ import ru.hse.spb.interpreter.ast.*
 
 class PrettyPrintingVisitor: ASTVisitor<Unit>() {
 
-    override fun visit(file: File) {
+    override suspend fun visit(file: File) {
         file.block.accept(this)
     }
 
-    override fun visit(block: Block) {
+    override suspend fun visit(block: Block) {
         block.statementList.forEach { withIndent { it.accept(this) }; println() }
     }
 
-    override fun visit(declaration: FunctionDeclaration) {
+    override suspend fun visit(declaration: FunctionDeclaration) {
         print("fun ${declaration.identifier.name}")
         withParentheses { print(declaration.parameters.joinToString(", ") { it.name }) }
         withBrackets { declaration.body.accept(this) }
     }
 
-    override fun visit(declaration: VariableDeclaration) {
+    override suspend fun visit(declaration: VariableDeclaration) {
         print("var ${declaration.identifier.name}")
         if (declaration.assignedExpression != null) {
             print(" = ")
@@ -26,13 +26,13 @@ class PrettyPrintingVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(statement: WhileStatement) {
+    override suspend fun visit(statement: WhileStatement) {
         print("while ")
         withParentheses { statement.condition.accept(this) }
         withBrackets { statement.body.accept(this) }
     }
 
-    override fun visit(statement: IfStatement) {
+    override suspend fun visit(statement: IfStatement) {
         print("if ")
         withParentheses { statement.condition.accept(this) }
         withBrackets { statement.trueBlock.accept(this) }
@@ -42,33 +42,33 @@ class PrettyPrintingVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(statement: AssignmentStatement) {
+    override suspend fun visit(statement: AssignmentStatement) {
         print("${statement.variableName.name} = ")
         statement.assignedExpression.accept(this)
     }
 
-    override fun visit(statement: ReturnStatement) {
+    override suspend fun visit(statement: ReturnStatement) {
         print("return ")
         statement.expression.accept(this)
     }
 
-    override fun visit(expression: MultiplicativeExpression) {
+    override suspend fun visit(expression: MultiplicativeExpression) {
         visitBinaryExpression(expression)
     }
 
-    override fun visit(expression: AdditiveExpression) {
+    override suspend fun visit(expression: AdditiveExpression) {
         visitBinaryExpression(expression)
     }
 
-    override fun visit(expression: ComparisonExpression) {
+    override suspend fun visit(expression: ComparisonExpression) {
         visitBinaryExpression(expression)
     }
 
-    override fun visit(expression: LogicalExpression) {
+    override suspend fun visit(expression: LogicalExpression) {
         visitBinaryExpression(expression)
     }
 
-    override fun visit(expression: FunctionCallExpression) {
+    override suspend fun visit(expression: FunctionCallExpression) {
         print(expression.identifier.name)
         withParentheses {
             if (expression.arguments.isNotEmpty())
@@ -80,7 +80,7 @@ class PrettyPrintingVisitor: ASTVisitor<Unit>() {
         }
     }
 
-    override fun visit(expression: UnarySignedExpression) {
+    override suspend fun visit(expression: UnarySignedExpression) {
         print(expression.sign.symbol)
         if (expression.signedSubexpression is BinaryExpression)
             withParentheses { expression.signedSubexpression.accept(this) }
@@ -88,15 +88,15 @@ class PrettyPrintingVisitor: ASTVisitor<Unit>() {
             expression.signedSubexpression.accept(this)
     }
 
-    override fun visit(identifier: Identifier) {
+    override suspend fun visit(identifier: Identifier) {
         print(identifier.name)
     }
 
-    override fun visit(literal: Literal) {
+    override suspend fun visit(literal: Literal) {
         print(literal.valueAsString)
     }
 
-    private fun visitBinaryExpression(expression: BinaryExpression) {
+    private suspend fun visitBinaryExpression(expression: BinaryExpression) {
         if (expression.left is BinaryExpression)
             withParentheses { expression.left.accept(this) }
         else
@@ -114,20 +114,20 @@ class PrettyPrintingVisitor: ASTVisitor<Unit>() {
         print("    ".repeat(indent) + str)
     }
 
-    private fun withIndent(block: () -> Unit) {
+    private suspend fun withIndent(block: suspend () -> Unit) {
         indent++
         printWithIndent("")
         block()
         indent--
     }
 
-    private fun withParentheses(block: () -> Unit) {
+    private suspend fun withParentheses(block: suspend () -> Unit) {
         print("(")
         block()
         print(")")
     }
 
-    private fun withBrackets(block: () -> Unit) {
+    private suspend fun withBrackets(block: suspend () -> Unit) {
         println(" {")
         block()
         printWithIndent("}")
